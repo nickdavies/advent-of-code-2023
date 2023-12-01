@@ -9,7 +9,12 @@ use std::{cmp, env, process};
 
 use super::ANSI_BOLD;
 
-pub fn run_part<I: Clone, T: Display>(func: impl Fn(I) -> Option<T>, input: I, day: Day, part: u8) {
+pub fn run_part<I: Clone, T: Display, E>(
+    func: impl Fn(I) -> Result<Option<T>, E>,
+    input: I,
+    day: Day,
+    part: u8,
+) {
     let part_str = format!("Part {part}");
 
     let (result, duration, samples) =
@@ -17,7 +22,7 @@ pub fn run_part<I: Clone, T: Display>(func: impl Fn(I) -> Option<T>, input: I, d
 
     print_result(&result, &part_str, &format_duration(&duration, samples));
 
-    if let Some(result) = result {
+    if let Ok(Some(result)) = result {
         submit_result(result, day, part);
     }
 }
@@ -92,11 +97,11 @@ fn format_duration(duration: &Duration, samples: u128) -> String {
     }
 }
 
-fn print_result<T: Display>(result: &Option<T>, part: &str, duration_str: &str) {
+fn print_result<T: Display, E>(result: &Result<Option<T>, E>, part: &str, duration_str: &str) {
     let is_intermediate_result = duration_str.is_empty();
 
     match result {
-        Some(result) => {
+        Ok(Some(result)) => {
             if result.to_string().contains('\n') {
                 let str = format!("{part}: ▼ {duration_str}");
                 if is_intermediate_result {
@@ -116,7 +121,15 @@ fn print_result<T: Display>(result: &Option<T>, part: &str, duration_str: &str) 
                 }
             }
         }
-        None => {
+        Ok(None) => {
+            if is_intermediate_result {
+                print!("{part}: -");
+            } else {
+                print!("\r");
+                println!("{part}: -             ");
+            }
+        }
+        Err(_) => {
             if is_intermediate_result {
                 print!("{part}: ✖");
             } else {

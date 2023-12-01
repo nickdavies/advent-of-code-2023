@@ -1,6 +1,8 @@
+use anyhow::Context;
+
 advent_of_code::solution!(1);
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
     let mut out = 0;
     for line in input.lines() {
         let mut first_digit = None;
@@ -19,13 +21,13 @@ pub fn part_one(input: &str) -> Option<u32> {
             }
         }
 
-        out += first_digit.unwrap() * 10;
-        out += last_digit.unwrap();
+        out += first_digit.context("Expected to find first digit")? * 10;
+        out += last_digit.context("Expected to find second digit")?;
     }
-    Some(out)
+    Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Result<Option<u32>, anyhow::Error> {
     let mut out = 0;
     for line in input.lines() {
         let mut first_digit = None;
@@ -73,7 +75,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         out += first_digit.unwrap() * 10;
         out += last_digit.unwrap();
     }
-    Some(out)
+    Ok(Some(out))
 }
 
 #[cfg(test)]
@@ -81,16 +83,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_part_one() {
-        let input = "1abc2\npqr3stu8vwx\na1b2c3d4e5f\ntreb7uchet";
-        let result = part_one(input);
+    fn test_part_one() -> anyhow::Result<()> {
+        let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
+        let result = part_one(input)?;
         assert_eq!(result, Some(142));
+        Ok(())
     }
 
     #[test]
-    fn test_part_two() {
-        let input = "two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen";
-        let result = part_two(input);
+    fn test_part_two() -> anyhow::Result<()> {
+        let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
+        let result = part_two(input)?;
         assert_eq!(result, Some(281));
+        Ok(())
     }
 }
