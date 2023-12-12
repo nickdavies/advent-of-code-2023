@@ -30,9 +30,7 @@ struct Location(usize, usize);
 
 impl Location {
     fn is_within<T>(&self, map: &[Vec<T>]) -> bool {
-        map.get(self.0)
-            .and_then(|row| row.get(self.1))
-            .is_some()
+        map.get(self.0).and_then(|row| row.get(self.1)).is_some()
     }
 
     fn bind<T>(self, bounding_map: &Vec<Vec<T>>) -> Result<BoundLocation<'_, T>> {
