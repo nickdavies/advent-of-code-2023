@@ -1,7 +1,7 @@
 /// Encapsulates code that interacts with solution functions.
 use crate::template::{aoc_cli, ANSI_ITALIC, ANSI_RESET};
 use crate::Day;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::io::{stdout, Write};
 use std::process::Output;
 use std::time::{Duration, Instant};
@@ -9,7 +9,7 @@ use std::{cmp, env, process};
 
 use super::ANSI_BOLD;
 
-pub fn run_part<I: Clone, T: Display, E>(
+pub fn run_part<I: Clone, T: Display, E: Debug>(
     func: impl Fn(I) -> Result<Option<T>, E>,
     input: I,
     day: Day,
@@ -97,7 +97,11 @@ fn format_duration(duration: &Duration, samples: u128) -> String {
     }
 }
 
-fn print_result<T: Display, E>(result: &Result<Option<T>, E>, part: &str, duration_str: &str) {
+fn print_result<T: Display, E: std::fmt::Debug>(
+    result: &Result<Option<T>, E>,
+    part: &str,
+    duration_str: &str,
+) {
     let is_intermediate_result = duration_str.is_empty();
 
     match result {
@@ -129,7 +133,8 @@ fn print_result<T: Display, E>(result: &Result<Option<T>, E>, part: &str, durati
                 println!("{part}: -             ");
             }
         }
-        Err(_) => {
+        Err(e) => {
+            println!("{:?}", e);
             if is_intermediate_result {
                 print!("{part}: ✖");
             } else {
