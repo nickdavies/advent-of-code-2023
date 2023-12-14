@@ -5,12 +5,13 @@ use nom::multi::{many1, separated_list1};
 use nom::sequence::separated_pair;
 use nom::Parser;
 use nom::{Finish, IResult};
+use std::collections::HashMap;
 
 use anyhow::{anyhow, Context, Result};
 
 advent_of_code::solution!(12);
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum Pattern {
     Unknown,
     Broken,
@@ -83,9 +84,17 @@ fn consume_n_broken(mut remaining_pattern: &[Pattern], target: u32) -> Option<&[
     }
 }
 
-fn get_combos(remaining_pattern: &[Pattern], remaining_nums: &[u32], depth: usize) -> usize {
-    if remaining_pattern.len() == 0 {
-        if remaining_nums.len() == 0 {
+fn get_combos<'a, 'b>(
+    remaining_pattern: &'a [Pattern],
+    remaining_nums: &'b [u32],
+    cache: &mut HashMap<(&'a [Pattern], &'b [u32]), usize>,
+) -> usize {
+    let key = (remaining_pattern, remaining_nums);
+    if let Some(cached) = cache.get(&key) {
+        return *cached;
+    }
+    if remaining_pattern.is_empty() {
+        if remaining_nums.is_empty() {
             return 1;
         } else {
             return 0;
@@ -95,8 +104,8 @@ fn get_combos(remaining_pattern: &[Pattern], remaining_nums: &[u32], depth: usiz
     let (first_pat, rest_pat) = remaining_pattern.split_at(1);
     let first_pat = &first_pat[0];
 
-    match first_pat {
-        Pattern::Operational => get_combos(rest_pat, remaining_nums, depth + 1),
+    let out = match first_pat {
+        Pattern::Operational => get_combos(rest_pat, remaining_nums, cache),
         // We must match an exact number form remaining nums
         Pattern::Broken => {
             let (first_num, rest_nums) = match remaining_nums.split_first() {
@@ -107,24 +116,22 @@ fn get_combos(remaining_pattern: &[Pattern], remaining_nums: &[u32], depth: usiz
             };
 
             // consume first_num.
-            match consume_n_broken(rest_pat, first_num - 1) {
-                Some(remaining_pattern) => get_combos(remaining_pattern, rest_nums, depth + 1),
+            match consume_n_broken(remaining_pattern, *first_num) {
+                Some(remaining_pattern) => get_combos(remaining_pattern, rest_nums, cache),
                 None => 0,
             }
         }
         Pattern::Unknown => {
             // Either we treat this as a working spring and just continue processing the
             // rest
-            let options_if_operational = get_combos(rest_pat, remaining_nums, depth + 1);
+            let options_if_operational = get_combos(rest_pat, remaining_nums, cache);
 
             // Or we treat this as the first broken one and consume next n
             let options_if_broken = match remaining_nums.split_first() {
                 Some((first_num, rest_nums)) => {
                     let res = consume_n_broken(remaining_pattern, *first_num);
                     match res {
-                        Some(remaining_pattern) => {
-                            get_combos(remaining_pattern, rest_nums, depth + 1)
-                        }
+                        Some(remaining_pattern) => get_combos(remaining_pattern, rest_nums, cache),
                         None => 0,
                     }
                 }
@@ -132,22 +139,43 @@ fn get_combos(remaining_pattern: &[Pattern], remaining_nums: &[u32], depth: usiz
             };
             options_if_operational + options_if_broken
         }
-    }
+    };
+    cache.insert(key, out);
+    out
 }
 
 pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     let data = parse_input(input).context("Failed to parse input")?;
     let mut out = 0;
 
-    for (pattern, nums) in data {
-        let combos = get_combos(&pattern, &nums, 0);
+    let mut cache = HashMap::new();
+    for (pattern, nums) in data.iter() {
+        let combos = get_combos(pattern, nums, &mut cache);
         out += combos;
     }
     Ok(Some(out))
 }
 
-pub fn part_two(_input: &str) -> Result<Option<u32>, anyhow::Error> {
-    Ok(None)
+pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+    let data = parse_input(input).context("Failed to parse input")?;
+
+    let mut out = 0;
+    for (pattern, nums) in data {
+        let mut cache = HashMap::new();
+        let mut new_pattern = Vec::new();
+        let mut new_nums = Vec::new();
+        for i in 0..5 {
+            new_pattern.extend(pattern.clone());
+            if i != 4 {
+                new_pattern.push(Pattern::Unknown);
+            }
+            new_nums.extend(nums.clone());
+        }
+        let combos = get_combos(&new_pattern, &new_nums, &mut cache);
+        out += combos;
+    }
+
+    Ok(Some(out))
 }
 
 #[cfg(test)]
@@ -166,7 +194,7 @@ mod tests {
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
         let result = part_two(input)?;
-        assert_eq!(result, None);
+        assert_eq!(result, Some(525152));
         Ok(())
     }
 }
