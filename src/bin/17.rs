@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use std::cell::RefCell;
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::rc::Rc;
 
 advent_of_code::solution!(17);
@@ -14,6 +14,14 @@ enum Direction {
 }
 
 impl Direction {
+    fn idx(&self) -> usize {
+        match self {
+            Self::North => 0,
+            Self::East => 1,
+            Self::South => 2,
+            Self::West => 3,
+        }
+    }
     fn left(&self) -> Self {
         match self {
             Self::North => Self::West,
@@ -33,8 +41,10 @@ impl Direction {
     }
 }
 
+type Grid<T> = Vec<Vec<T>>;
+
 #[derive(Debug)]
-struct Map(Vec<Vec<u32>>);
+struct Map(Grid<u32>);
 
 #[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
 struct Location(usize, usize);
@@ -74,46 +84,56 @@ impl Map {
 }
 
 #[derive(Clone, Debug)]
-struct Movement {
+struct Movement<'a> {
+    map: &'a Map,
     location: Location,
     direction: Direction,
     min_distance: usize,
     max_distance: usize,
     current_distance: usize,
     total_cost: u32,
-    //seen: Vec<Location>,
-    best: Rc<RefCell<HashMap<(Location, Direction), u32>>>,
+    // We cache by the same vec shape as the input map
+    // and also for each input direction.
+    best: Rc<RefCell<Grid<[Option<u32>; 4]>>>,
 }
 
-impl Movement {
+impl<'a> Movement<'a> {
     fn new(
+        map: &'a Map,
         location: Location,
         direction: Direction,
         min_distance: usize,
         max_distance: usize,
     ) -> Self {
+        let mut cache = Vec::new();
+        for row in &map.0 {
+            let mut cache_row = Vec::new();
+            for _ in row {
+                cache_row.push([None; 4]);
+            }
+            cache.push(cache_row);
+        }
         Self {
+            map,
             location,
             direction,
             min_distance,
             max_distance,
             current_distance: 0,
             total_cost: 0,
-            //seen: Vec::new(),
-            best: Rc::new(RefCell::new(HashMap::new())),
+            best: Rc::new(RefCell::new(cache)),
         }
     }
 
-    fn test_path(&self, map: &Map, new_direction: Direction) -> Option<Self> {
-        if let Some(new_loc) = map.go_direction(&self.location, &new_direction) {
-            let cost = map.get(&new_loc);
+    fn test_path(&self, new_direction: Direction) -> Option<Self> {
+        if let Some(new_loc) = self.map.go_direction(&self.location, &new_direction) {
+            let cost = self.map.get(&new_loc);
             let total_cost = self.total_cost + cost;
-            let mut best = self.best.borrow_mut();
-            let key = (new_loc, new_direction);
-            match best.get(&key) {
+            let cache = &mut self.best.borrow_mut()[new_loc.0][new_loc.1][new_direction.idx()];
+            match cache {
                 Some(lowest_cost) => {
                     if &total_cost < lowest_cost {
-                        best.insert(key.clone(), total_cost);
+                        *cache = Some(total_cost);
                     } else {
                         // We have been here with 0 distance, in the same direction with
                         // lower cost. There is no need to go this way again.
@@ -121,55 +141,51 @@ impl Movement {
                     }
                 }
                 None => {
-                    best.insert(key.clone(), total_cost);
+                    *cache = Some(total_cost);
                 }
             }
-
-            let (new_loc, new_direction) = key;
-            // let mut seen = self.seen.clone();
-            // seen.push(new_loc.clone());
             return Some(Self {
+                map: self.map,
                 location: new_loc,
                 direction: new_direction,
                 min_distance: self.min_distance,
                 max_distance: self.max_distance,
                 current_distance: 1,
                 total_cost,
-                // seen,
                 best: self.best.clone(),
             });
         }
         None
     }
 
-    fn available_paths(&self, map: &Map) -> Vec<Self> {
+    fn available_paths(&self) -> Vec<Self> {
         let mut out = Vec::new();
 
-        if self.current_distance >= self.min_distance {
+        let can_turn = self.current_distance >= self.min_distance;
+
+        if can_turn {
             let left = self.direction.left();
-            if let Some(left_node) = self.test_path(map, left) {
+            if let Some(left_node) = self.test_path(left) {
                 out.push(left_node);
             }
 
             let right = self.direction.right();
-            if let Some(right_node) = self.test_path(map, right) {
+            if let Some(right_node) = self.test_path(right) {
                 out.push(right_node);
             }
         }
 
         if self.current_distance < self.max_distance {
-            if let Some(next_loc) = map.go_direction(&self.location, &self.direction) {
-                // let mut seen = self.seen.clone();
-                // seen.push(next_loc.clone());
-                let cost = map.get(&next_loc);
+            if let Some(next_loc) = self.map.go_direction(&self.location, &self.direction) {
+                let cost = self.map.get(&next_loc);
                 out.push(Self {
+                    map: self.map,
                     location: next_loc,
                     direction: self.direction.clone(),
                     min_distance: self.min_distance,
                     max_distance: self.max_distance,
                     current_distance: self.current_distance + 1,
                     total_cost: self.total_cost + cost,
-                    // seen,
                     best: self.best.clone(),
                 })
             }
@@ -189,12 +205,14 @@ fn seek_end(input: &str, min_distance: usize, max_distance: usize) -> Result<Opt
 
     let mut to_visit = VecDeque::new();
     to_visit.push_front(Movement::new(
+        &map,
         map.get_location(0, 0).context("Expected to find (0,0)")?,
         Direction::East,
         min_distance,
         max_distance,
     ));
     to_visit.push_front(Movement::new(
+        &map,
         map.get_location(0, 0).context("Expected to find (0,0)")?,
         Direction::South,
         min_distance,
@@ -207,7 +225,7 @@ fn seek_end(input: &str, min_distance: usize, max_distance: usize) -> Result<Opt
     let mut best: Option<Movement> = None;
     while !to_visit.is_empty() {
         let node = to_visit.pop_front().unwrap();
-        for next_node in node.available_paths(&map) {
+        for next_node in node.available_paths() {
             if next_node.location == target && next_node.current_distance >= min_distance {
                 match &best {
                     Some(best_cost) => {
@@ -220,21 +238,9 @@ fn seek_end(input: &str, min_distance: usize, max_distance: usize) -> Result<Opt
                     }
                 }
             }
-            // println!(
-            //     "HERE: {:?} -> {:?} ({}/{})",
-            //     node.location,
-            //     next_node.location,
-            //     next_node.seen.len(),
-            //     next_node.total_cost
-            // );
             to_visit.push_back(next_node);
         }
     }
-
-    // if let Some(best) = &best {
-    //     println!("{:?}, {:?}", best.seen, target);
-    // };
-
     Ok(best.map(|n| n.total_cost))
 }
 
