@@ -84,17 +84,20 @@ fn parse_input(
 #[derive(Debug)]
 struct Path {
     locations: Vec<Location>,
+    total_points: u64,
 }
 
 impl Path {
     fn from_instructions(instructions: &[DigInstruction]) -> Path {
         let mut out = Path {
             locations: Vec::new(),
+            total_points: 1,
         };
 
         out.locations.push(Location(0, 0));
 
         for instruction in instructions {
+            out.total_points += instruction.distance as u64;
             let location = out
                 .locations
                 .last()
@@ -115,7 +118,7 @@ impl Path {
             sum += det;
         }
 
-        let abs_sum = sum.abs_diff(0) + self.locations.len() as u64;
+        let abs_sum = sum.abs_diff(0) + self.total_points;
 
         if abs_sum % 2 == 0 {
             abs_sum / 2
@@ -144,9 +147,7 @@ pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
         DigInstruction::from_colour_code(segments.next().context("Expected colour code")?)
     })
     .context("failed to parse input")?;
-    println!("pre path: {}", instructions.len());
     let path = Path::from_instructions(&instructions);
-    println!("HERE: {}", path.locations.len());
     Ok(Some(path.get_area()))
 }
 
