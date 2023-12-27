@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -223,7 +224,7 @@ fn parse_input(input: &str) -> Result<Vec<Brick>> {
     Ok(out)
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let snapshot = parse_input(input).context("Failed to parse input")?;
     let (bricks, _) = Bricks::from_snapshot(snapshot, true).context("Failed to build bricks")?;
 
@@ -237,7 +238,7 @@ pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     Ok(Some(can_destroy.len()))
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let snapshot = parse_input(input).context("Failed to parse input")?;
     let (bricks, _) = Bricks::from_snapshot(snapshot, true).context("Failed to build bricks")?;
 
@@ -270,7 +271,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(5));
         Ok(())
     }
@@ -278,7 +279,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(7));
         Ok(())
     }

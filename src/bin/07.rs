@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -158,7 +159,7 @@ impl FromStr for Hand {
     }
 }
 
-pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let mut data = input
         .lines()
         .map(|line| {
@@ -176,7 +177,7 @@ pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
     Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let mut data = input
         .lines()
         .map(|line| {
@@ -202,7 +203,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(6440));
         Ok(())
     }
@@ -210,7 +211,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(5905));
         Ok(())
     }

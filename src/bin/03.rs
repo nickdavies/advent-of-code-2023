@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::anyhow;
 use std::collections::BTreeMap;
 
@@ -87,7 +88,7 @@ fn any_matching(rows: &Vec<usize>, cols: &Vec<usize>, symbols: &[Vec<bool>]) -> 
     false
 }
 
-pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let symbols = build_symbols(input, |c| !(c.is_ascii_digit() || c == '.'));
 
     let mut out = 0;
@@ -99,7 +100,7 @@ pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
     Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let symbols = build_symbols(input, |c| c == '*');
 
     let mut gears = BTreeMap::new();
@@ -142,7 +143,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(4361));
         Ok(())
     }
@@ -150,7 +151,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(467835));
         Ok(())
     }

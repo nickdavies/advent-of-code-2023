@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{Context, Result};
 use petgraph::graphmap::UnGraphMap;
 use std::collections::BTreeSet;
@@ -37,7 +38,7 @@ fn external_connections(
     external
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let graph = parse_input(input).context("Failed to parse input")?;
 
     let mut lhs: BTreeSet<&str> = graph.nodes().collect();
@@ -60,7 +61,7 @@ pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     Ok(Some(lhs.len() * (graph.node_count() - lhs.len())))
 }
 
-pub fn part_two(_input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_two(_input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     Ok(None)
 }
 
@@ -71,7 +72,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(54));
         Ok(())
     }

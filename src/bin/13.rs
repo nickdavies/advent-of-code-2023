@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Result};
 
 advent_of_code::solution!(13);
@@ -79,11 +80,11 @@ pub fn find_reflections(input: &str, target_delta: usize) -> Result<Option<usize
     Ok(Some(out))
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     find_reflections(input, 0)
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     find_reflections(input, 1)
 }
 
@@ -94,7 +95,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(405));
         Ok(())
     }
@@ -102,7 +103,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(400));
         Ok(())
     }

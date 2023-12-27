@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -415,7 +416,7 @@ fn parse_input(input: &str) -> anyhow::Result<(Workflows<'_>, Vec<Part>)> {
     }
 }
 
-pub fn part_one(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let (workflows, parts) = parse_input(input).context("failed to parse input")?;
     let out = workflows
         .sum_matching_parts(&parts)
@@ -423,7 +424,7 @@ pub fn part_one(input: &str) -> Result<Option<u64>, anyhow::Error> {
     Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let (workflows, _) = parse_input(input).context("failed to parse input")?;
 
     let full_range = PartRange {
@@ -445,7 +446,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(19114));
         Ok(())
     }
@@ -453,7 +454,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(167409079868000));
         Ok(())
     }

@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 
 advent_of_code::solution!(18);
@@ -128,7 +129,7 @@ impl Path {
     }
 }
 
-pub fn part_one(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let instructions = parse_input(input, |mut segments| {
         DigInstruction::from_normal(
             segments.next().context("Expected a direction")?,
@@ -140,7 +141,7 @@ pub fn part_one(input: &str) -> Result<Option<u64>, anyhow::Error> {
     Ok(Some(path.get_area()))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let instructions = parse_input(input, |mut segments| {
         segments.next().context("Expected a direction")?;
         segments.next().context("Expected a distance")?;
@@ -158,7 +159,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(62));
         Ok(())
     }
@@ -166,7 +167,7 @@ mod tests {
     #[test]
     fn test_part_one_custom() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 3);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(78));
         Ok(())
     }
@@ -174,7 +175,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(952408144115));
         Ok(())
     }

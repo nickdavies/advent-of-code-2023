@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use nom::branch::alt;
 use nom::character::complete::{char as nom_char, line_ending, multispace0, u32 as nom_u32};
 use nom::combinator::all_consuming;
@@ -144,7 +145,7 @@ fn get_combos<'a, 'b>(
     out
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let data = parse_input(input).context("Failed to parse input")?;
     let mut out = 0;
 
@@ -156,7 +157,7 @@ pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let data = parse_input(input).context("Failed to parse input")?;
 
     let mut out = 0;
@@ -185,7 +186,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(21));
         Ok(())
     }
@@ -193,7 +194,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(525152));
         Ok(())
     }

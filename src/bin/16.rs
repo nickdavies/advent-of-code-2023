@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 use std::collections::BTreeSet;
 
@@ -161,7 +162,7 @@ fn follow_path(
     out
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let map = parse_input(input).context("failed to parse input")?;
     let mut seen = BTreeSet::new();
 
@@ -176,7 +177,7 @@ pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     Ok(Some(locations.len()))
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let map = parse_input(input).context("failed to parse input")?;
 
     let mut max = 0;
@@ -198,7 +199,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(46));
         Ok(())
     }
@@ -206,7 +207,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(51));
         Ok(())
     }

@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 use std::collections::BTreeSet;
 use std::collections::BinaryHeap;
@@ -156,7 +157,7 @@ fn get_possible(grid: &Map<bool>, start_location: Location, steps: usize) -> BTr
     out
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let (grid, start_location) = parse_input(input, |char| match char {
         '.' => Ok((false, true)),
         '#' => Ok((false, false)),
@@ -259,7 +260,7 @@ fn get_diag_sum(grid: &Map<bool>, start: Location, steps: usize) -> u64 {
     sum
 }
 
-pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let (grid, start_location) = parse_input(input, |char| match char {
         '.' => Ok((false, true)),
         '#' => Ok((false, false)),
@@ -288,7 +289,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(42));
         Ok(())
     }
@@ -336,7 +337,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(598044246091826));
         Ok(())
     }

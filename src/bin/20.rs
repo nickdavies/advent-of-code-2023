@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use anyhow::{anyhow, Context, Result};
@@ -200,7 +201,7 @@ fn gcd_of_two_numbers(a: u64, b: u64) -> u64 {
     gcd_of_two_numbers(b, a % b)
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let mut nodes = parse_input(input).context("Failed to parse input")?;
     let mut total_low_pulses = 0;
     let mut total_high_pulses = 0;
@@ -217,7 +218,7 @@ pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     Ok(Some(total_low_pulses * total_high_pulses))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let mut nodes = parse_input(input).context("Failed to parse input")?;
     let mut count = 0;
 
@@ -263,7 +264,7 @@ mod tests {
     #[test]
     fn test_part_one_example_1() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(32000000));
         Ok(())
     }
@@ -271,7 +272,7 @@ mod tests {
     #[test]
     fn test_part_one_example_2() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 3);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(11687500));
         Ok(())
     }
@@ -279,7 +280,7 @@ mod tests {
     #[test]
     fn test_part_one_real_input() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 4);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(899848294));
         Ok(())
     }
@@ -287,7 +288,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(244055946148853));
         Ok(())
     }

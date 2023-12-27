@@ -10,6 +10,11 @@ pub const ANSI_ITALIC: &str = "\x1b[3m";
 pub const ANSI_BOLD: &str = "\x1b[1m";
 pub const ANSI_RESET: &str = "\x1b[0m";
 
+pub enum RunType {
+    Real,
+    Example,
+}
+
 /// Helper function that reads a text file to a string.
 #[must_use]
 pub fn read_file(folder: &str, day: Day) -> String {

@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{Context, Result};
 
 advent_of_code::solution!(15);
@@ -13,7 +14,7 @@ pub fn hash_segment(input: &str) -> Result<u8> {
     Ok(hash as u8)
 }
 
-pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let mut out: u32 = 0;
     for segment in input.trim().split(',') {
         let hash = hash_segment(segment).context("Failed to hash segment")? as u32;
@@ -22,7 +23,7 @@ pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
     Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let mut boxes: Vec<Vec<(&str, u8)>> = Vec::with_capacity(256);
     for _ in 0..256 {
         boxes.push(Vec::new());
@@ -79,7 +80,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(1320));
         Ok(())
     }
@@ -87,7 +88,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(145));
         Ok(())
     }

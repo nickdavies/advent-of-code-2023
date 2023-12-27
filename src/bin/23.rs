@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 use petgraph::algo::simple_paths::all_simple_paths;
 use petgraph::graph::NodeIndex;
@@ -282,12 +283,12 @@ struct NodeVisit {
     distance: usize,
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let (grid, start, end) = parse_input(input).context("Failed to parse input")?;
     grid.longest_path::<Directed>(start, end, false)
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let (grid, start, end) = parse_input(input).context("Failed to parse input")?;
     grid.longest_path::<Undirected>(start, end, true)
 }
@@ -299,7 +300,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(94));
         Ok(())
     }
@@ -307,7 +308,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(154));
         Ok(())
     }

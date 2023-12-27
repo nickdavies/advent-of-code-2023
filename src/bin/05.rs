@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::Context;
 use itertools::Itertools;
 use std::collections::BTreeSet;
@@ -108,7 +109,7 @@ pub fn parse_maps(mut sections: std::str::Split<'_, &str>) -> Result<InputData, 
     })
 }
 
-pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let mut sections = input.split("\n\n");
 
     let seeds: BTreeSet<u32> = sections
@@ -132,7 +133,7 @@ pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
     Ok(Some(min))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let mut sections = input.split("\n\n");
 
     let mut seeds = sections
@@ -176,7 +177,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(35));
         Ok(())
     }
@@ -184,7 +185,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(46));
         Ok(())
     }

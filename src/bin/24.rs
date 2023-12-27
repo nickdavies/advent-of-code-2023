@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{Context, Result};
 use num_bigint::BigInt;
 use num_traits::cast::ToPrimitive;
@@ -144,7 +145,7 @@ fn test_in_range(lines: &[(Line, Hail)], lowest: u64, highest: u64) -> usize {
     intersects
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let hail = parse_input(input).context("Failed to parse input")?;
     let lines: Vec<(Line, Hail)> = hail.into_iter().map(|h| (h.line_x_for_y(), h)).collect();
 
@@ -188,7 +189,7 @@ fn find_plane(s1: &Hail, s2: &Hail) -> (V3, BigInt) {
 
 // Most of the math logic here is adapted from:
 // https://www.reddit.com/r/adventofcode/comments/18pnycy/comment/kersplf/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-pub fn part_two(input: &str) -> Result<Option<i128>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<i128>, anyhow::Error> {
     let hail = parse_input(input).context("Failed to parse input")?;
 
     let s1 = &hail[0];
@@ -262,7 +263,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(12740));
         Ok(())
     }
@@ -270,7 +271,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(47));
         Ok(())
     }

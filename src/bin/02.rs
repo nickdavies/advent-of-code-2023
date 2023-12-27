@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context};
 use std::collections::BTreeMap;
 
@@ -99,7 +100,7 @@ fn parse_games(input: &str) -> anyhow::Result<Vec<GameData>> {
     Ok(out)
 }
 
-pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let data = parse_games(input).context("failed to parse input data")?;
 
     let mut possible = 0;
@@ -116,7 +117,7 @@ pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
     Ok(Some(possible))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let data = parse_games(input).context("failed to parse input data")?;
     let total: u32 = data.iter().map(|game| game.game_power()).sum();
 
@@ -130,7 +131,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(8));
         Ok(())
     }
@@ -138,7 +139,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(2286));
         Ok(())
     }

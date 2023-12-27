@@ -1,5 +1,5 @@
 /// Encapsulates code that interacts with solution functions.
-use crate::template::{aoc_cli, ANSI_ITALIC, ANSI_RESET};
+use crate::template::{aoc_cli, RunType, ANSI_ITALIC, ANSI_RESET};
 use crate::Day;
 use std::fmt::{Debug, Display};
 use std::io::{stdout, Write};
@@ -10,7 +10,7 @@ use std::{cmp, env, process};
 use super::ANSI_BOLD;
 
 pub fn run_part<I: Clone, T: Display, E: Debug>(
-    func: impl Fn(I) -> Result<Option<T>, E>,
+    func: impl Fn(I, RunType) -> Result<Option<T>, E>,
     input: I,
     day: Day,
     part: u8,
@@ -31,12 +31,12 @@ pub fn run_part<I: Clone, T: Display, E: Debug>(
 ///  1. in debug, the function is executed once.
 ///  2. in release, the function is benched (approx. 1 second of execution time or 10 samples, whatever take longer.)
 fn run_timed<I: Clone, T>(
-    func: impl Fn(I) -> T,
+    func: impl Fn(I, RunType) -> T,
     input: I,
     hook: impl Fn(&T),
 ) -> (T, Duration, u128) {
     let timer = Instant::now();
-    let result = func(input.clone());
+    let result = func(input.clone(), RunType::Real);
     let base_time = timer.elapsed();
 
     hook(&result);
@@ -50,7 +50,11 @@ fn run_timed<I: Clone, T>(
     (result, run.0, run.1)
 }
 
-fn bench<I: Clone, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> (Duration, u128) {
+fn bench<I: Clone, T>(
+    func: impl Fn(I, RunType) -> T,
+    input: I,
+    base_time: &Duration,
+) -> (Duration, u128) {
     let mut stdout = stdout();
 
     print!(" > {ANSI_ITALIC}benching{ANSI_RESET}");
@@ -70,7 +74,7 @@ fn bench<I: Clone, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> 
         // need a clone here to make the borrow checker happy.
         let cloned = input.clone();
         let timer = Instant::now();
-        func(cloned);
+        func(cloned, RunType::Real);
         timers.push(timer.elapsed());
     }
 

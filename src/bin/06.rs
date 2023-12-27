@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::Context;
 
 advent_of_code::solution!(6);
@@ -36,7 +37,7 @@ fn calculate_race_options(time: u64, distance: u64) -> u64 {
     max_time - min_time + 1
 }
 
-pub fn part_one(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let (times, distances) = extract_lines(input)?;
 
     let times = times.split_whitespace().map(|s| s.parse::<u64>());
@@ -49,7 +50,7 @@ pub fn part_one(input: &str) -> Result<Option<u64>, anyhow::Error> {
     Ok(Some(out))
 }
 
-pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let (time, distance) = extract_lines(input)?;
     let time: u64 = time.replace(' ', "").parse()?;
     let distance: u64 = distance.replace(' ', "").parse()?;
@@ -63,7 +64,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(288));
         Ok(())
     }
@@ -71,7 +72,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(71503));
         Ok(())
     }

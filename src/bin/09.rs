@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use nom::character::complete::{i32 as nom_i32, line_ending, space1};
 use nom::combinator::all_consuming;
 use nom::multi::{many1, separated_list1};
@@ -68,11 +69,11 @@ fn solve(input: &str, get_next: FnGetNext) -> anyhow::Result<Option<i32>> {
     Ok(Some(out))
 }
 
-pub fn part_one(input: &str) -> Result<Option<i32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<i32>, anyhow::Error> {
     solve(input, |seq, next| seq.0.last().unwrap() + next)
 }
 
-pub fn part_two(input: &str) -> Result<Option<i32>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<i32>, anyhow::Error> {
     solve(input, |seq, next| seq.0.first().unwrap() - next)
 }
 
@@ -83,7 +84,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(114));
         Ok(())
     }
@@ -91,7 +92,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(2));
         Ok(())
     }

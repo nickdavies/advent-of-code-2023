@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::anyhow;
 use nom::bytes::complete::tag;
 use nom::character::complete::{alphanumeric1, anychar, line_ending, multispace0};
@@ -64,7 +65,7 @@ fn parse_input(input: &str) -> anyhow::Result<(Vec<Direction>, Map)> {
     }
 }
 
-pub fn part_one(input: &str) -> Result<Option<u32>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<u32>, anyhow::Error> {
     let (directions, mapping) = parse_input(input)?;
 
     let mut out = 0;
@@ -136,7 +137,7 @@ fn gcd_of_two_numbers(a: u64, b: u64) -> u64 {
     gcd_of_two_numbers(b, a % b)
 }
 
-pub fn part_two(input: &str) -> Result<Option<u64>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<u64>, anyhow::Error> {
     let (directions, mapping) = parse_input(input)?;
 
     let mut all_current = Vec::new();
@@ -163,7 +164,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(2));
         Ok(())
     }
@@ -171,7 +172,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(6));
         Ok(())
     }

@@ -1,3 +1,4 @@
+use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 use std::collections::HashMap;
 
@@ -140,7 +141,7 @@ fn parse_input(input: &str) -> Result<Map> {
     Ok(Map(out))
 }
 
-pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     Ok(Some(
         parse_input(input)
             .context("Failed to parse input")?
@@ -149,7 +150,7 @@ pub fn part_one(input: &str) -> Result<Option<usize>, anyhow::Error> {
     ))
 }
 
-pub fn part_two(input: &str) -> Result<Option<usize>, anyhow::Error> {
+pub fn part_two(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow::Error> {
     let mut map = parse_input(input).context("Failed to parse input")?;
     let mut seen: HashMap<InnerMap, usize> = HashMap::new();
     let mut cycle_idx = None;
@@ -188,7 +189,7 @@ mod tests {
     #[test]
     fn test_part_one() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 1);
-        let result = part_one(input)?;
+        let result = part_one(input, RunType::Example)?;
         assert_eq!(result, Some(136));
         Ok(())
     }
@@ -196,7 +197,7 @@ mod tests {
     #[test]
     fn test_part_two() -> anyhow::Result<()> {
         let input = &advent_of_code::template::read_file_part("examples", DAY, 2);
-        let result = part_two(input)?;
+        let result = part_two(input, RunType::Example)?;
         assert_eq!(result, Some(64));
         Ok(())
     }
