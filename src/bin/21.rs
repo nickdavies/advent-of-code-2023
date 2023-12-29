@@ -3,83 +3,9 @@ use anyhow::{anyhow, Context, Result};
 use std::collections::BTreeSet;
 use std::collections::BinaryHeap;
 
+use aoc_lib::grid::{Direction, Location, Map};
+
 advent_of_code::solution!(21);
-
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-enum Direction {
-    North,
-    East,
-    South,
-    West,
-}
-
-impl Direction {
-    fn all() -> &'static [Direction; 4] {
-        &[
-            Direction::North,
-            Direction::East,
-            Direction::South,
-            Direction::West,
-        ]
-    }
-}
-
-type Grid<T> = Vec<Vec<T>>;
-
-#[derive(Debug)]
-struct Map<T>(Grid<T>);
-
-impl<T> Map<T> {
-    fn get(&self, location: &Location) -> &T {
-        &self.0[location.0][location.1]
-    }
-
-    fn get_location(&self, x: usize, y: usize) -> Option<Location> {
-        self.0
-            .get(x)
-            .and_then(|row| row.get(y))
-            .map(|_| Location(x, y))
-    }
-
-    fn go_direction(&self, current: &Location, direction: &Direction) -> Option<Location> {
-        match direction {
-            Direction::North => {
-                if current.0 != 0 {
-                    Some(Location(current.0 - 1, current.1))
-                } else {
-                    None
-                }
-            }
-            Direction::East => self.get_location(current.0, current.1 + 1),
-            Direction::South => self.get_location(current.0 + 1, current.1),
-            Direction::West => {
-                if current.1 != 0 {
-                    Some(Location(current.0, current.1 - 1))
-                } else {
-                    None
-                }
-            }
-        }
-    }
-
-    fn bottom_right(&self) -> Option<Location> {
-        let row = self.0.last()?;
-        Some(Location(self.0.len() - 1, row.len() - 1))
-    }
-
-    fn values(&self) -> Vec<(Location, &T)> {
-        let mut out = Vec::new();
-        for (i, row) in self.0.iter().enumerate() {
-            for (j, col) in row.iter().enumerate() {
-                out.push((Location(i, j), col))
-            }
-        }
-        out
-    }
-}
-
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-struct Location(usize, usize);
 
 fn parse_input<T>(input: &str, parse: fn(char) -> Result<(bool, T)>) -> Result<(Map<T>, Location)> {
     let mut out = Vec::new();
@@ -142,8 +68,8 @@ fn get_distances(map: &Map<bool>, start: Location, step_limit: usize) -> Map<Opt
 fn get_possible(grid: &Map<bool>, start_location: Location, steps: usize) -> BTreeSet<Location> {
     let distances = get_distances(grid, start_location, steps);
     let mut distances: Vec<(Location, usize)> = distances
-        .values()
-        .into_iter()
+        .iter()
+        .flatten()
         .filter_map(|(l, v)| Some((l, (*v)?)))
         .collect();
     distances.sort_by_key(|(_, d)| *d);
@@ -173,7 +99,7 @@ pub fn part_one(input: &str, _run_type: RunType) -> Result<Option<usize>, anyhow
 fn get_odd_even_counts(distances: &Map<Option<usize>>) -> (usize, usize) {
     let mut even = 0;
     let mut odd = 0;
-    for (_, distance) in distances.values() {
+    for (_, distance) in distances.iter().flatten() {
         if let Some(distance) = distance {
             if distance % 2 == 0 {
                 even += 1;

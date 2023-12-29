@@ -4,99 +4,13 @@ use std::cell::RefCell;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 
+use aoc_lib::grid::{Direction, Grid, Location, Map};
+
 advent_of_code::solution!(17);
-
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-enum Direction {
-    North,
-    East,
-    South,
-    West,
-}
-
-impl Direction {
-    fn idx(&self) -> usize {
-        match self {
-            Self::North => 0,
-            Self::East => 1,
-            Self::South => 2,
-            Self::West => 3,
-        }
-    }
-    fn left(&self) -> Self {
-        match self {
-            Self::North => Self::West,
-            Self::East => Self::North,
-            Self::South => Self::East,
-            Self::West => Self::South,
-        }
-    }
-
-    fn right(&self) -> Self {
-        match self {
-            Self::North => Self::East,
-            Self::East => Self::South,
-            Self::South => Self::West,
-            Self::West => Self::North,
-        }
-    }
-}
-
-type Grid<T> = Vec<Vec<T>>;
-
-#[derive(Debug)]
-struct Map(Grid<usize>);
-
-impl Map {
-    fn get(&self, location: &Location) -> usize {
-        self.0[location.0][location.1]
-    }
-
-    fn get_location(&self, x: usize, y: usize) -> Option<Location> {
-        self.0
-            .get(x)
-            .and_then(|row| row.get(y))
-            .map(|_| Location(x, y))
-    }
-
-    fn bottom_right(&self) -> Location {
-        Location(self.0.len() - 1, self.0[self.0.len() - 1].len() - 1)
-    }
-
-    fn go_direction(&self, current: &Location, direction: &Direction) -> Option<Location> {
-        match direction {
-            Direction::North => {
-                if current.0 != 0 {
-                    Some(Location(current.0 - 1, current.1))
-                } else {
-                    None
-                }
-            }
-            Direction::East => self.get_location(current.0, current.1 + 1),
-            Direction::South => self.get_location(current.0 + 1, current.1),
-            Direction::West => {
-                if current.1 != 0 {
-                    Some(Location(current.0, current.1 - 1))
-                } else {
-                    None
-                }
-            }
-        }
-    }
-}
-
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-struct Location(usize, usize);
-
-impl Location {
-    fn manhattan_dist(&self, other: &Self) -> usize {
-        self.0.abs_diff(other.0) + self.1.abs_diff(other.1)
-    }
-}
 
 #[derive(Clone, Debug)]
 struct Movement<'a> {
-    map: &'a Map,
+    map: &'a Map<usize>,
     location: Location,
     direction: Direction,
     min_distance: usize,
@@ -123,7 +37,7 @@ impl PartialOrd for Movement<'_> {
 
 impl Ord for Movement<'_> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        let target = self.map.bottom_right();
+        let target = self.map.bottom_right().unwrap();
 
         let my_weight = self.total_cost + self.location.manhattan_dist(&target);
         let other_weight = other.total_cost + other.location.manhattan_dist(&target);
@@ -134,7 +48,7 @@ impl Ord for Movement<'_> {
 
 impl<'a> Movement<'a> {
     fn new(
-        map: &'a Map,
+        map: &'a Map<usize>,
         location: Location,
         direction: Direction,
         min_distance: usize,
@@ -161,7 +75,7 @@ impl<'a> Movement<'a> {
     }
 
     fn weight(&self) -> usize {
-        let target = self.map.bottom_right();
+        let target = self.map.bottom_right().unwrap();
         self.total_cost + self.location.manhattan_dist(&target)
     }
 
@@ -279,7 +193,7 @@ fn seek_end(input: &str, min_distance: usize, max_distance: usize) -> Result<Opt
     Ok(best.map(|n| n.total_cost))
 }
 
-fn parse_input(input: &str) -> Result<Map> {
+fn parse_input(input: &str) -> Result<Map<usize>> {
     let mut out = Vec::new();
     for line in input.lines() {
         let mut out_line = Vec::new();

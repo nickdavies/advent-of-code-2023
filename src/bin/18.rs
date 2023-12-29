@@ -1,28 +1,9 @@
 use advent_of_code::template::RunType;
 use anyhow::{anyhow, Context, Result};
 
+use aoc_lib::grid::{Direction, UnboundLocation as Location};
+
 advent_of_code::solution!(18);
-
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-enum Direction {
-    North,
-    East,
-    South,
-    West,
-}
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-struct Location(i64, i64);
-
-impl Location {
-    fn go_direction(&self, direction: &Direction, distance: usize) -> Location {
-        match direction {
-            Direction::North => Location(self.0 - distance as i64, self.1),
-            Direction::East => Location(self.0, self.1 + distance as i64),
-            Direction::South => Location(self.0 + distance as i64, self.1),
-            Direction::West => Location(self.0, self.1 - distance as i64),
-        }
-    }
-}
 
 struct DigInstruction {
     direction: Direction,

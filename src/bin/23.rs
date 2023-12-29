@@ -6,82 +6,43 @@ use petgraph::Graph;
 use petgraph::{Directed, EdgeType, Undirected};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use aoc_lib::grid::{Direction, Location, Map};
+
 advent_of_code::solution!(23);
 
-#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
-enum Direction {
-    North,
-    East,
-    South,
-    West,
+trait MapExt {
+    fn adjacent(&self, location: &Location) -> Vec<(Direction, Location)>;
+
+    fn find_junctions(&self) -> BTreeSet<Location>;
+
+    fn seek_from(
+        &self,
+        from: Location,
+        key_locations: &BTreeSet<Location>,
+        climb_slopes: bool,
+    ) -> Vec<(Location, usize)>;
+
+    fn build_graph<D: EdgeType>(
+        &self,
+        start: Location,
+        end: Location,
+        climb_slopes: bool,
+    ) -> Result<(Graph<Location, usize, D>, NodeIndex, NodeIndex)>;
+
+    fn longest_path<E: EdgeType>(
+        &self,
+        start: Location,
+        end: Location,
+        climb_slopes: bool,
+    ) -> Result<Option<usize>>;
 }
 
-impl Direction {
-    fn all() -> &'static [Direction; 4] {
-        &[
-            Direction::North,
-            Direction::East,
-            Direction::South,
-            Direction::West,
-        ]
-    }
-}
-
-type Grid<T> = Vec<Vec<T>>;
-
-#[derive(Debug)]
-struct Map<T>(Grid<T>);
-
-impl<T> Map<T> {
-    fn get(&self, location: &Location) -> &T {
-        &self.0[location.0][location.1]
-    }
-
-    fn get_location(&self, x: usize, y: usize) -> Option<Location> {
-        self.0
-            .get(x)
-            .and_then(|row| row.get(y))
-            .map(|_| Location(x, y))
-    }
-
-    fn go_direction(&self, current: &Location, direction: &Direction) -> Option<Location> {
-        match direction {
-            Direction::North => {
-                if current.0 != 0 {
-                    Some(Location(current.0 - 1, current.1))
-                } else {
-                    None
-                }
-            }
-            Direction::East => self.get_location(current.0, current.1 + 1),
-            Direction::South => self.get_location(current.0 + 1, current.1),
-            Direction::West => {
-                if current.1 != 0 {
-                    Some(Location(current.0, current.1 - 1))
-                } else {
-                    None
-                }
-            }
-        }
-    }
-
-    fn values(&self) -> Vec<(Location, &T)> {
-        let mut out = Vec::new();
-        for (i, row) in self.0.iter().enumerate() {
-            for (j, col) in row.iter().enumerate() {
-                out.push((Location(i, j), col))
-            }
-        }
-        out
-    }
-}
-
-impl Map<MapValue> {
-    fn adjacent(&self, location: Location) -> Vec<(Direction, Location)> {
+impl MapExt for Map<MapValue> {
+    fn adjacent(&self, location: &Location) -> Vec<(Direction, Location)> {
         Direction::all()
             .iter()
             .filter_map(|direction| {
-                let next_location = self.go_direction(&location, direction)?;
+                let next_location = self.go_direction(location, direction)?;
                 if let MapValue::Forest = self.get(&next_location) {
                     None
                 } else {
@@ -93,14 +54,14 @@ impl Map<MapValue> {
 
     fn find_junctions(&self) -> BTreeSet<Location> {
         let mut junctions = BTreeSet::new();
-        for (location, value) in self.values() {
+        for (location, value) in self.iter().flatten() {
             if let MapValue::Path = value {
             } else {
                 continue;
             }
 
-            if self.adjacent(location).len() >= 3 {
-                junctions.insert(location);
+            if self.adjacent(&location).len() >= 3 {
+                junctions.insert(location.clone());
             }
         }
 
@@ -130,9 +91,9 @@ impl Map<MapValue> {
             }
             seen.insert(current.clone());
 
-            for (next_direction, next) in self.adjacent(current.location) {
-                if let Some(prev) = current.prev {
-                    if prev == next {
+            for (next_direction, next) in self.adjacent(&current.location) {
+                if let Some(prev) = &current.prev {
+                    if prev == &next {
                         continue;
                     }
                 }
@@ -153,7 +114,7 @@ impl Map<MapValue> {
                     if add {
                         to_visit.push_back(NodeVisit {
                             location: next,
-                            prev: Some(current.location),
+                            prev: Some(current.location.clone()),
                             distance: current.distance + 1,
                         });
                     }
@@ -170,19 +131,19 @@ impl Map<MapValue> {
         climb_slopes: bool,
     ) -> Result<(Graph<Location, usize, D>, NodeIndex, NodeIndex)> {
         let mut junctions = self.find_junctions();
-        junctions.insert(start);
-        junctions.insert(end);
+        junctions.insert(start.clone());
+        junctions.insert(end.clone());
 
         let mut out =
             Graph::<Location, usize, D>::with_capacity(junctions.len() + 2, junctions.len() * 3);
         let mut node_map = BTreeMap::new();
         for junction in &junctions {
-            let node_id = out.add_node(*junction);
-            node_map.insert(*junction, node_id);
+            let node_id = out.add_node(junction.clone());
+            node_map.insert(junction.clone(), node_id);
         }
 
         for junction in &junctions {
-            let key_nodes = self.seek_from(*junction, &junctions, climb_slopes);
+            let key_nodes = self.seek_from(junction.clone(), &junctions, climb_slopes);
             for (target, distance) in key_nodes {
                 out.add_edge(
                     *node_map.get(junction).unwrap(),
@@ -219,14 +180,27 @@ impl Map<MapValue> {
     }
 }
 
-#[derive(Debug, Clone, Copy, Ord, Eq, PartialEq, PartialOrd, Hash)]
-struct Location(usize, usize);
-
 #[derive(Debug)]
 enum MapValue {
     Path,
     Forest,
     Slope(Direction),
+}
+
+impl TryFrom<char> for MapValue {
+    type Error = anyhow::Error;
+
+    fn try_from(c: char) -> Result<Self, Self::Error> {
+        match c {
+            '#' => Ok(MapValue::Forest),
+            '.' => Ok(MapValue::Path),
+            '^' => Ok(MapValue::Slope(Direction::North)),
+            '>' => Ok(MapValue::Slope(Direction::East)),
+            'v' => Ok(MapValue::Slope(Direction::South)),
+            '<' => Ok(MapValue::Slope(Direction::West)),
+            other => Err(anyhow!("Got unexpected value {} in input", other)),
+        }
+    }
 }
 
 fn find_single_path(row: &[MapValue]) -> Result<usize> {
@@ -243,37 +217,19 @@ fn find_single_path(row: &[MapValue]) -> Result<usize> {
 }
 
 fn parse_input(input: &str) -> Result<(Map<MapValue>, Location, Location)> {
-    let mut out = Vec::new();
-    for line in input.lines() {
-        let mut out_line = Vec::new();
-        for char in line.chars() {
-            match char {
-                '#' => out_line.push(MapValue::Forest),
-                '.' => out_line.push(MapValue::Path),
-                '^' => out_line.push(MapValue::Slope(Direction::North)),
-                '>' => out_line.push(MapValue::Slope(Direction::East)),
-                'v' => out_line.push(MapValue::Slope(Direction::South)),
-                '<' => out_line.push(MapValue::Slope(Direction::West)),
-                other => {
-                    return Err(anyhow!("Got unexpected value {} in input", other));
-                }
-            }
-        }
-        out.push(out_line);
-    }
-
+    let out = Map::try_from(input)?;
     let start = Location(
         0,
-        find_single_path(out.first().context("Expected at least 1 row")?)
+        find_single_path(out.0.first().context("Expected at least 1 row")?)
             .context("Failed to find start node")?,
     );
     let end = Location(
-        out.len() - 1,
-        find_single_path(out.last().context("Expected at least 1 row")?)
+        out.0.len() - 1,
+        find_single_path(out.0.last().context("Expected at least 1 row")?)
             .context("Failed to find end node")?,
     );
 
-    Ok((Map(out), start, end))
+    Ok((out, start, end))
 }
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
